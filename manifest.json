@@ -1,0 +1,25 @@
+{
+  "manifest_version": 2,
+  "name": "GFN Congestion Tester",
+  "version": "0.1.0",
+  "description": "Mesure ping et jitter vers des points de terminaison GeForce NOW avant une session de cloud gaming.",
+  "icons": {
+    "48": "icons/icon-48.svg",
+    "128": "icons/icon-128.svg"
+  },
+  "browser_action": {
+    "default_title": "GFN Congestion Tester",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icons/icon-48.svg",
+      "128": "icons/icon-128.svg"
+    }
+  },
+  "permissions": [
+    "storage",
+    "*://gfn.nvidia.com/*",
+    "*://gfn-*.nvidia.com/*",
+    "*://api.nvidia.com/*",
+    "*://static.nvidia.com/*"
+  ]
+}

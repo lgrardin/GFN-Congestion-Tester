@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GFN Congestion Tester</title>
+  <link rel="stylesheet" href="popup.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="panel">
+    <header class="header">
+      <div class="title-block">
+        <div class="logo-dot"></div>
+        <h1>GFN Network Check</h1>
+      </div>
+      <button id="run-check" class="pill">Relancer</button>
+    </header>
+
+    <section class="summary">
+      <div>
+        <p class="label">Meilleur point</p>
+        <p id="best-endpoint" class="value">--</p>
+      </div>
+      <div class="badge" id="overall-badge">En attente</div>
+    </section>
+
+    <section class="metrics">
+      <div class="metric-card">
+        <p class="label">Ping moyen</p>
+        <p class="value" id="avg-ping">-- ms</p>
+        <span class="badge" id="ping-badge">--</span>
+      </div>
+      <div class="metric-card">
+        <p class="label">Jitter</p>
+        <p class="value" id="jitter">-- ms</p>
+        <span class="badge" id="jitter-badge">--</span>
+      </div>
+    </section>
+
+    <section>
+      <p class="label">Details par point</p>
+      <div id="server-list" class="server-list"></div>
+    </section>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
