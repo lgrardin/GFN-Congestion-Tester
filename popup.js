@@ -1,19 +1,10 @@
-// GFN POPs (Points of Presence) - discovered dynamically
-// Fallback list of known GFN endpoints by region
+// GFN Public Endpoints - Publicly accessible NVIDIA GFN services
+// Note: NVIDIA keeps regional POPs private; only public endpoints are tested here
 const FALLBACK_SERVERS = [
-  // Europe
-  { name: 'Frankfurt (EU)', region: 'eu-de', url: 'https://gfn-eu-de.nvidia.com/' },
-  { name: 'Paris (EU)', region: 'eu-fr', url: 'https://gfn-eu-fr.nvidia.com/' },
-  { name: 'UK (EU)', region: 'eu-uk', url: 'https://gfn-eu-uk.nvidia.com/' },
-  // North America
-  { name: 'US-West (NA)', region: 'na-us-west', url: 'https://gfn-na-us-west.nvidia.com/' },
-  { name: 'US-East (NA)', region: 'na-us-east', url: 'https://gfn-na-us-east.nvidia.com/' },
-  // Asia Pacific
-  { name: 'Japan (APAC)', region: 'ap-jp', url: 'https://gfn-ap-jp.nvidia.com/' },
-  { name: 'Singapore (APAC)', region: 'ap-sg', url: 'https://gfn-ap-sg.nvidia.com/' },
-  { name: 'South Korea (APAC)', region: 'ap-kr', url: 'https://gfn-ap-kr.nvidia.com/' },
-  // Fallback primary endpoint
-  { name: 'GFN Primary API', region: 'primary', url: 'https://gfn.nvidia.com/' }
+  { name: 'GFN Developer', region: 'dev', url: 'https://developer.geforcenow.com/' },
+  { name: 'GFN Status', region: 'status', url: 'https://status.geforcenow.com/' },
+  { name: 'GFN API', region: 'api', url: 'https://api.geforcenow.com/' },
+  { name: 'GFN Primary', region: 'primary', url: 'https://gfn.nvidia.com/' }
 ];
 
 let servers = FALLBACK_SERVERS;
@@ -163,31 +154,49 @@ function renderResults(results) {
 }
 
 async function discoverServers() {
-  // Try to fetch GFN configuration from NVIDIA
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), DISCOVERY_TIMEOUT);
-    const res = await fetch('https://gfn.nvidia.com/api/config', {
-      method: 'GET',
-      cache: 'no-store',
-      mode: 'cors',
-      signal: controller.signal
-    });
-    clearTimeout(timeout);
-    if (res.ok) {
-      const data = await res.json();
-      // Expected format: { "pops": [ { "name": "...", "host": "..." } ] }
-      if (data.pops && Array.isArray(data.pops)) {
-        return data.pops.map(p => ({
-          name: p.name || p.host,
-          region: p.region || 'unknown',
-          url: `https://${p.host}/`
-        }));
+  // Try multiple NVIDIA API endpoints to discover real POPs
+  const discoveryUrls = [
+    'https://gfn.nvidia.com/api/config',
+    'https://gfn.nvidia.com/api/servers',
+    'https://gfn.nvidia.com/api/cloudrender/servers',
+    'https://gfn.nvidia.com/api/v1/servers',
+    'https://gfn.nvidia.com/api/locations'
+  ];
+  
+  for (const url of discoveryUrls) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), DISCOVERY_TIMEOUT);
+      const res = await fetch(url, {
+        method: 'GET',
+        cache: 'no-store',
+        mode: 'cors',
+        signal: controller.signal
+      });
+      clearTimeout(timeout);
+      
+      if (res.ok) {
+        const data = await res.json();
+        console.log('Discovered from', url, data);
+        
+        // Try various JSON structures that NVIDIA might use
+        let pops = data.pops || data.servers || data.locations || data.data;
+        
+        if (Array.isArray(pops) && pops.length > 0) {
+          return pops.map(p => ({
+            name: p.name || p.host || p.region || 'Unknown',
+            region: p.region || p.zone || 'unknown',
+            url: p.url || (p.host ? `https://${p.host}/` : null)
+          })).filter(p => p.url);
+        }
       }
+    } catch (err) {
+      // Try next endpoint
+      console.log('Discovery failed for', url);
     }
-  } catch (err) {
-    // Discovery failed, will use fallback
   }
+  
+  // Fallback to testing just the main endpoint + some common patterns
   return FALLBACK_SERVERS;
 }
 

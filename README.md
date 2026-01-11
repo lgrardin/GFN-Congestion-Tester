@@ -1,13 +1,14 @@
 # GFN Congestion Tester
 
-Une extension Firefox simple pour vérifier rapidement la latence (ping) et le jitter
-de votre navigateur vers quelques points de terminaison utilisés par GeForce NOW.
+Une extension Firefox / Zen Browser simple pour vérifier rapidement la latence (ping) et le jitter
+de votre navigateur vers les services NVIDIA GeForce NOW.
 Utile pour évaluer la qualité réseau avant une session de cloud gaming sur le service.
 
 **Caractéristiques**
-- Mesure du ping moyen (RTT) et du jitter (écart-type) par point.
+- Mesure du ping moyen (RTT) et du jitter (écart-type) des endpoints GFN publics.
 - Code couleur simple : **vert** (Bon), **orange** (Limite), **rouge** (Mauvais).
 - Interface légère en popup avec icônes et thème inspiré du vert NVIDIA.
+- Découverte automatique des serveurs GFN accessibles.
 
 **Fichiers importants**
 - **Popup et UI** : [popup.html](popup.html)
@@ -16,48 +17,74 @@ Utile pour évaluer la qualité réseau avant une session de cloud gaming sur le
 - **Manifest** : [manifest.json](manifest.json)
 - **Icônes** : [icons/icon-48.svg](icons/icon-48.svg), [icons/icon-128.svg](icons/icon-128.svg)
 
-**Installation (développement / test local)**
-1. Ouvrir Firefox.
-2. Aller à `about:debugging` → "This Firefox".
-3. Cliquer sur "Load Temporary Add-on..." et sélectionner le fichier `manifest.json` du projet.
-4. L'extension apparaîtra dans la barre d'outils ; cliquer sur l'icône pour ouvrir la popup.
+**Installation**
 
+**Méthode recommandée : Chargement temporaire (Développement)**
+
+1. Ouvre **Zen Browser** ou **Firefox**
+2. Va à `about:debugging` dans la barre d'adresse
+3. Clique sur **"This Browser"** (à gauche)
+4. Clique sur **"Load Temporary Add-on..."**
+5. Sélectionne le fichier `manifest.json` du projet
+6. ✅ L'extension s'affiche dans la barre d'outils — clique dessus pour tester !
+
+**À chaque modification du code :**
+- Retourne à `about:debugging`
+- Clique sur le bouton **"Reload"** à côté de l'extension
+- La modification est appliquée immédiatement
 
 **Comment ça marche**
-- L'extension découvre automatiquement les POPs (Points of Presence) GFN via l'API NVIDIA.
-- Si la découverte échoue, elle utilise une liste de fallback avec les POPs connus par région (EU, NA, APAC).
-- Pour chaque serveur découvert ou disponible en fallback, elle effectue plusieurs requêtes rapides 
-  (par défaut 6) et mesure le délai aller-retour (RTT).
+- L'extension teste les endpoints publics NVIDIA GFN accessibles publiquement.
+- Pour chaque serveur, elle effectue plusieurs requêtes rapides (par défaut 6) et mesure le délai aller-retour (RTT).
 - Les échecs ou timeouts sont ignorés ; si tous les probes vers un serveur échouent, il est marqué comme injoignable.
 - Le jitter est estimé par l'écart-type des échantillons valides.
-- **L'extension affiche le meilleur serveur en haut**, celui que NVIDIA vous assigne typiquement dans son app de cloud gaming.
-**POPs testés (automatiquement découverts)**
-L'extension teste les Points of Presence (POPs) GFN répartis globalement :
-- **Europe** : Frankfurt, Paris, UK
-- **North America** : US-West, US-East
-- **Asia Pacific** : Japan, Singapore, South Korea
-- **Fallback** : Endpoint principal GFN en cas de découverte échouée
+- **L'extension affiche le serveur avec la meilleure latence en haut**, indicateur de la qualité réseau vers GFN.
 
-La découverte utilise l'API interne `https://gfn.nvidia.com/api/config` qui liste les POPs réels assignés à votre région.
-Si cette API est injoignable, l'extension utilise une liste de fallback mise à jour manuellement.
-- Ping : Bon ≤ 40 ms — Limite ≤ 80 ms — Mauvais > 80 ms
-- Jitter : Bon ≤ 8 ms — Limite ≤ 20 ms — Mauvais > 20 ms
+**Serveurs testés**
+L'extension teste ces endpoints publics NVIDIA GFN :
+- **GFN Developer** (developer.geforcenow.com) - Portail développeur officiel
+- **GFN Status** (status.geforcenow.com) - Page de statut des services
+- **GFN API** (api.geforcenow.com) - API officielle
+- **GFN Primary** (gfn.nvidia.com) - Endpoint principal
 
-Ces valeurs sont modifiables directement dans `popup.js` si vous souhaitez des seuils plus
-stricts ou tolérants.
+**Note** : NVIDIA garde les URLs des POPs régionaux privés. Ces endpoints publics permettent de tester la
+connectivité générale vers l'infrastructure GFN. Pour des mesures précises par région, NVIDIA utilise
+une sélection automatique dans son app officielle basée sur votre géolocalisation.
+**Utilisation**
 
-**Personnalisation**
-- Pour tester d'autres points de terminaison (par ex. POPs GFN précis), éditez le tableau
-	`servers` dans [popup.js](popup.js). Adaptez aussi les permissions dans [manifest.json](manifest.json)
-	si vous ajoutez de nouveaux domaines.
+1. Clique sur l'icône de l'extension dans la barre d'outils
+2. La popup s'ouvre et lance automatiquement les tests
+3. Attends ~30 secondes pour que tous les serveurs soient testés
+4. Le serveur avec la meilleure latence s'affiche en haut
+5. Clique sur "Relancer" pour refaire un test
 
-Limitation importante : pour contourner certaines politiques CORS et obtenir un RTT rapide,
-les requêtes utilisent `fetch` en `no-cors` (mesure d'un aller-retour HTTP simple). Selon la
-configuration des serveurs et des CDN, certaines requêtes peuvent échouer ou renvoyer des
-valeurs RTT approximatives. Pour des mesures réseau plus précises, un outil natif (ping ICMP)
-ou un script serveur relais est recommandé.
+**Interprétation des résultats**
+- **Vert (Bon)** : Latence basse, jitter faible → Prêt pour GFN
+- **Orange (Moyen)** : Latence modérée, jitter acceptable → Utilisable
+- **Rouge (Mauvais)** : Latence élevée, jitter important → Qualité réseau à vérifier
 
-**Tester**
-- Ouvrez la popup ; la mesure démarre automatiquement. Cliquez sur "Relancer" pour refaire
-	un test.
+**Notes techniques**
+- Les requêtes utilisent `fetch` en mode `no-cors` (mesure du RTT HTTP simple).
+- NVIDIA ne publie pas les URLs des POPs régionaux — seuls les endpoints publics sont testés ici.
+- Pour des mesures réseau plus précises (ICMP ping, latence par région), un outil natif est recommandé.
+
+**Développement**
+
+Pour modifier l'extension :
+1. Éditez les fichiers (`popup.js`, `popup.css`, `popup.html`, etc.)
+2. Retournez à `about:debugging` 
+3. Cliquez sur **"Reload"** à côté de l'extension
+4. Testez vos changements immédiatement dans le popup
+
+Pour ajouter d'autres serveurs à tester :
+- Éditez le tableau `FALLBACK_SERVERS` dans [popup.js](popup.js)
+- Ajoutez les permissions correspondantes dans [manifest.json](manifest.json)
+- Testez que les nouveaux serveurs répondent vraiment
+
+**Publication future (optionnel)**
+Pour distribuer l'extension plus largement :
+- Signer avec `web-ext sign` (nécessite compte Mozilla)
+- Publier sur le [Mozilla Add-ons Store](https://addons.mozilla.org)
+
+Consultez le fichier [package.json](package.json) pour les scripts de build disponibles.
 
