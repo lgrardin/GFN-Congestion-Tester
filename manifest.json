@@ -3,6 +3,12 @@
   "name": "GFN Congestion Tester",
   "version": "0.1.0",
   "description": "Mesure ping et jitter GFN",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "gfn-congestion-tester@lgrardin.github.io",
+      "strict_min_version": "109.0"
+    }
+  },
   "icons": {
     "48": "icons/icon-48.svg",
     "128": "icons/icon-128.svg"

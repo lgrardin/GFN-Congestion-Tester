@@ -1,0 +1,22 @@
+{
+  "name": "gfn-congestion-tester",
+  "version": "0.1.0",
+  "description": "Extension Firefox pour tester la latence vers NVIDIA GeForce NOW",
+  "scripts": {
+    "build": "web-ext build --overwrite-dest",
+    "dev": "web-ext run",
+    "lint": "web-ext lint"
+  },
+  "devDependencies": {
+    "web-ext": "^8.0.0"
+  },
+  "keywords": [
+    "firefox",
+    "extension",
+    "geforce-now",
+    "network",
+    "latency"
+  ],
+  "author": "lgrardin",
+  "license": "MIT"
+}

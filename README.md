@@ -19,7 +19,23 @@ Utile pour évaluer la qualité réseau avant une session de cloud gaming sur le
 
 **Installation**
 
-**Méthode recommandée : Chargement temporaire (Développement)**
+**Méthode 1 : Installation via XPI (Recommandée)**
+
+1. **Télécharge** le fichier XPI depuis les [Releases](../../releases) ou génère-le toi-même :
+   ```bash
+   npm install
+   npm run build
+   ```
+   Le fichier XPI sera créé dans `web-ext-artifacts/`
+
+2. Ouvre **Zen Browser** ou **Firefox**
+3. Va à `about:addons` dans la barre d'adresse
+4. Clique sur l'icône ⚙️ (engrenage) en haut à droite
+5. Sélectionne **"Install Add-on From File..."**
+6. Sélectionne le fichier `.zip` généré dans `web-ext-artifacts/`
+7. ✅ L'extension s'installe et s'affiche dans la barre d'outils — clique dessus pour tester !
+
+**Méthode 2 : Chargement temporaire (Développement)**
 
 1. Ouvre **Zen Browser** ou **Firefox**
 2. Va à `about:debugging` dans la barre d'adresse
@@ -28,7 +44,7 @@ Utile pour évaluer la qualité réseau avant une session de cloud gaming sur le
 5. Sélectionne le fichier `manifest.json` du projet
 6. ✅ L'extension s'affiche dans la barre d'outils — clique dessus pour tester !
 
-**À chaque modification du code :**
+**À chaque modification du code (développement) :**
 - Retourne à `about:debugging`
 - Clique sur le bouton **"Reload"** à côté de l'extension
 - La modification est appliquée immédiatement
@@ -69,6 +85,11 @@ une sélection automatique dans son app officielle basée sur votre géolocalisa
 - Pour des mesures réseau plus précises (ICMP ping, latence par région), un outil natif est recommandé.
 
 **Développement**
+
+**Scripts disponibles :**
+- `npm run build` - Génère le fichier XPI dans `web-ext-artifacts/`
+- `npm run dev` - Lance Firefox avec l'extension chargée en mode développement
+- `npm run lint` - Vérifie le code de l'extension
 
 Pour modifier l'extension :
 1. Éditez les fichiers (`popup.js`, `popup.css`, `popup.html`, etc.)
