@@ -3,7 +3,6 @@ module.exports = {
     'package.json',
     'package-lock.json',
     'web-ext-config.cjs',
-    'web-ext-config.js',
     'node_modules',
     'web-ext-artifacts',
     '.git',

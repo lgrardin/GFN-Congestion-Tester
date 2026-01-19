@@ -4,7 +4,6 @@
   "description": "Extension Firefox pour tester la latence vers NVIDIA GeForce NOW",
   "scripts": {
     "build": "web-ext build --overwrite-dest",
-    "build:xpi": "web-ext build --overwrite-dest",
     "dev": "web-ext run",
     "lint": "web-ext lint"
   },
